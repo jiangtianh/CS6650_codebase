@@ -53,12 +53,22 @@ public class ResultHandler {
 
     private void plotThroughput() {
         List<Long[]> timestamps = new ArrayList<>();
+        long initialStartTime = Long.MAX_VALUE;
+        long finalEndTime = Long.MIN_VALUE;
         for (ResultRecord result : resultRecord) {
             long startTime = result.getStartTimeStamp();
             long endTime = startTime + result.getLatency();
+            if (startTime < initialStartTime) {
+                initialStartTime = startTime;
+            }
+            if (endTime > finalEndTime) {
+                finalEndTime = endTime;
+            }
             timestamps.add(new Long[]{startTime, endTime});
         }
         List<Double> throughput = ThroughputCalculator.calculateThroughput(timestamps, 1000);
+
+        System.out.println("Throughput: " + resultRecord.size() / ((finalEndTime - initialStartTime) / 1000.0));
 
         ThroughputPlotter.plotThroughput(throughput);
     }
