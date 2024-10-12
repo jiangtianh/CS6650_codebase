@@ -18,7 +18,7 @@ import ResultHandaling.ResultHandler;
 
 public class TestLatency {
     private static final int TOTAL_REQUESTS = 10000;
-    private static final String BASE_URL = "http://52.88.120.229:8080/JavaServlets_war/skiers";
+    private static final String BASE_URL = "http://52.12.95.126:8080/JavaServlets_war/skiers";
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
