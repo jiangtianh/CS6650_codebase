@@ -2,6 +2,7 @@ import JSONClasses.ErrorMessage;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -9,9 +10,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import JSONClasses.LiftRide;
+import JSONClasses.LiftRidePostRequest;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.rabbitmq.client.Channel;
 
 
 @WebServlet(value = "/skiers/*")
@@ -119,8 +122,34 @@ public class SkierServlet extends HttpServlet {
             sendErrorResponse(res, HttpServletResponse.SC_BAD_REQUEST, "Invalid LiftRide JSON");
             return;
         }
-
+        int resortID = Integer.parseInt(urlParts[1]);
+        int seasonID = Integer.parseInt(urlParts[3]);
+        int dayID = Integer.parseInt(urlParts[5]);
+        int skierID = Integer.parseInt(urlParts[7]);
         LiftRide liftRide = new Gson().fromJson(JsonParser.parseString(requestBody.toString()).getAsJsonObject(), LiftRide.class);
+
+        Channel channel = null;
+        try {
+            RabbitMQChannelPool channelPool = RabbitMQChannelPool.getInstance();
+            channel = channelPool.borrowChannel();
+            if (channel == null) {
+                sendErrorResponse(res, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "No available RabbitMQ channels in the pool");
+                return;
+            }
+            channel.basicPublish("", RabbitMQChannelPool.QUEUE_NAME, null, new Gson().toJson(new LiftRidePostRequest(resortID, seasonID, dayID, skierID, liftRide)).getBytes("UTF-8"));
+        } catch (Exception e) {
+            sendErrorResponse(res, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to publish message to RabbitMQ");
+            return;
+        } finally {
+            if (channel != null) {
+                try {
+                    RabbitMQChannelPool.getInstance().returnChannel(channel);
+                } catch (TimeoutException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
 
         res.setStatus(HttpServletResponse.SC_CREATED);
         res.getWriter().write(new Gson().toJson(liftRide));
@@ -157,11 +186,12 @@ public class SkierServlet extends HttpServlet {
             }
 
             try {
-                jsonObject.get("time").getAsInt();
-                jsonObject.get("liftID").getAsInt();
+                int time = jsonObject.get("time").getAsInt();
+                int liftId = jsonObject.get("liftID").getAsInt();
             } catch (NumberFormatException | ClassCastException e) {
                 return false;
             }
+
             return true;
         } catch (Exception e) {
             return false;
@@ -172,4 +202,7 @@ public class SkierServlet extends HttpServlet {
         res.setStatus(status);
         res.getWriter().write(new Gson().toJson(new ErrorMessage(message)));
     }
+
+
+
 }
