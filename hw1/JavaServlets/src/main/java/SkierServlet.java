@@ -138,6 +138,7 @@ public class SkierServlet extends HttpServlet {
             }
             channel.basicPublish("", RabbitMQChannelPool.QUEUE_NAME, null, new Gson().toJson(new LiftRidePostRequest(resortID, seasonID, dayID, skierID, liftRide)).getBytes("UTF-8"));
         } catch (Exception e) {
+            e.printStackTrace();
             sendErrorResponse(res, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to publish message to RabbitMQ");
             return;
         } finally {

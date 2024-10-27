@@ -15,7 +15,7 @@ public class ThroughputPlotter extends JFrame {
         super(title);
 
         JFreeChart lineChart = ChartFactory.createLineChart(
-                "Throughput Over Time",
+                "Client Throughput Over Time",
                 "Time (s)",
                 "Throughput (req/s)",
                 createDataset(throughputData),
