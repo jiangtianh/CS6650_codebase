@@ -13,14 +13,15 @@ public class PostSkiersEndpointTest {
 
 
     private static final String CSV_PATH = "result.csv";
-    private static final String BASE_URL = "http://35.160.119.75:8080/JavaServlets_war/skiers";
+    private static final String BASE_URL = "http://JavaServeletLoadBalancer-706956886.us-west-2.elb.amazonaws.com/JavaServlets_war/skiers";
+
 
     private static final int TOTAL_REQUESTS = 200000;
     private static final int INITIAL_THREADS = 32;
     private static final int REQUESTS_PER_INITIAL_TREAD = 1000;
 
-    private static final int LaterThreads = 168;
-    private static final int LaterRequestPerThread = 1000;
+    private static final int LaterThreads = 336;
+    private static final int LaterRequestPerThread = 500;
 
 
     private static final BlockingDeque<RequestUrlAndJson> eventQueue = new LinkedBlockingDeque<>();

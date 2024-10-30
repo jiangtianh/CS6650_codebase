@@ -6,12 +6,12 @@ import com.rabbitmq.client.Connection;
 import com.google.gson.Gson;
 import com.rabbitmq.client.DeliverCallback;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
 
 public class MessageConsumerTask implements Runnable {
 
@@ -41,7 +41,9 @@ public class MessageConsumerTask implements Runnable {
             final Channel channel = connection.createChannel();
 
             channel.queueDeclare(QUEUE_NAME, true, false, false, null);
-            channel.basicQos(1);
+            channel.basicQos(30);
+
+            List<Long> deliveryTags = new ArrayList<>();
 
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
                 if (isFirstMessageReceived.compareAndSet(false, true)) {
@@ -51,15 +53,27 @@ public class MessageConsumerTask implements Runnable {
                 long messageStartTime = System.currentTimeMillis();
                 String messageJson = new String(delivery.getBody(), "UTF-8");
                 storeLiftRide(messageJson);
+
+                deliveryTags.add(delivery.getEnvelope().getDeliveryTag());
+                this.latch.countDown();
+
+                if (deliveryTags.size() >= 20) {
+                    channel.basicAck(deliveryTags.get(deliveryTags.size() - 1), true);
+                    deliveryTags.clear();
+                }
+
                 long messageEndTime = System.currentTimeMillis();
                 this.resultQueue.add(new ResultRecord(messageStartTime, messageEndTime));
-                channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-                this.latch.countDown();
             };
 
             channel.basicConsume(QUEUE_NAME, false, deliverCallback, consumerTag -> { });
 
-        } catch (IOException e) {
+            latch.await();
+            if (!deliveryTags.isEmpty()) {
+                channel.basicAck(deliveryTags.get(deliveryTags.size() - 1), true);
+            }
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
