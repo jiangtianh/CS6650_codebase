@@ -3,7 +3,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 public class RedisConnection {
-    private static final String REDIS_HOST = "localhost";
+    public static final String REDIS_HOST = "35.89.31.135";
     private static final int REDIS_PORT = 6379;
 
     private static JedisPool jedisPool = null;

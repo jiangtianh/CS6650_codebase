@@ -7,9 +7,11 @@ import org.apache.commons.httpclient.HttpMethodRetryHandler;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.commons.lang3.concurrent.EventCountCircuitBreaker;
 
 import java.io.IOException;
 import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PostWorker implements Runnable {
@@ -19,12 +21,19 @@ public class PostWorker implements Runnable {
     private final BlockingDeque<RequestUrlAndJson> queue;
     private final AtomicInteger successfulRequests;
     private final BlockingDeque<ResponseRecord> resultQueue;
+    private final EventCountCircuitBreaker circuitBreaker;
 
-    public PostWorker(int requestNumber, BlockingDeque<RequestUrlAndJson> queue, AtomicInteger successfulRequests, BlockingDeque<ResponseRecord> resultQueue) {
+    public PostWorker(int requestNumber,
+                      BlockingDeque<RequestUrlAndJson> queue,
+                      AtomicInteger successfulRequests,
+                      BlockingDeque<ResponseRecord> resultQueue,
+                      EventCountCircuitBreaker circuitBreaker) {
         this.requestNumber = requestNumber;
         this.queue = queue;
         this.successfulRequests = successfulRequests;
         this.resultQueue = resultQueue;
+
+        this.circuitBreaker = circuitBreaker;
     }
 
     @Override
@@ -41,11 +50,16 @@ public class PostWorker implements Runnable {
         };
         HttpClient client = new HttpClient();
 
-        try {
-            for (int i = 0; i < requestNumber; i++) {
-                RequestUrlAndJson requestUrlAndJson = queue.take();
 
-                sendPostRequest(client, retryHandler, requestUrlAndJson);
+        try {
+            int processedRequests = 0;
+            while (processedRequests < requestNumber) {
+                if (circuitBreaker.checkState()) {
+                    RequestUrlAndJson requestUrlAndJson = queue.take();
+                    sendPostRequest(client, retryHandler, requestUrlAndJson);
+                    processedRequests++;
+                    circuitBreaker.incrementAndCheckState();
+                }
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

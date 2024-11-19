@@ -4,6 +4,8 @@ import PostSkiersEndpointTest.ResponseHandling.CSVWriter;
 import PostSkiersEndpointTest.ResponseHandling.ResponseRecord;
 import PostSkiersEndpointTest.RequestsGeneration.EventGenerator;
 import PostSkiersEndpointTest.RequestsGeneration.RequestUrlAndJson;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.lang3.concurrent.EventCountCircuitBreaker;
 
 
 import java.util.concurrent.*;
@@ -14,14 +16,14 @@ public class PostSkiersEndpointTest {
 
     private static final String CSV_PATH = "result.csv";
 //    private static final String BASE_URL = "http://JavaServeletLoadBalancer-706956886.us-west-2.elb.amazonaws.com/JavaServlets_war/skiers";
-    private static final String BASE_URL = "http://localhost:8080/JavaServlets_war_exploded/skiers";
+//    private static final String BASE_URL = "http://localhost:8080/JavaServlets_war_exploded/skiers";
+    private static final String BASE_URL = "http://44.242.215.217:8080/JavaServlets_war/skiers";
 
     private static final int TOTAL_REQUESTS = 200000;
     private static final int INITIAL_THREADS = 32;
     private static final int REQUESTS_PER_INITIAL_TREAD = 1000;
 
-    private static final int LaterThreads = 168;
-    private static final int LaterRequestPerThread = 1000;
+    private static final int LaterThreads = 64;
 
 
     private static final BlockingDeque<RequestUrlAndJson> eventQueue = new LinkedBlockingDeque<>();
@@ -41,10 +43,13 @@ public class PostSkiersEndpointTest {
 
         long startTime = System.currentTimeMillis();
 
+        HttpClient client = new HttpClient();
+        EventCountCircuitBreaker circuitBreaker = new EventCountCircuitBreaker(3800, 1, TimeUnit.SECONDS, 3300);
+
         for (int i = 0; i < INITIAL_THREADS; i++) {
             initialExecutor.submit(() -> {
                 try {
-                    new PostWorker(REQUESTS_PER_INITIAL_TREAD, eventQueue, successCount, resultQueue).run();
+                    new PostWorker(REQUESTS_PER_INITIAL_TREAD, eventQueue, successCount, resultQueue, circuitBreaker).run();
                 } finally {
                     latch.countDown();
                 }
@@ -57,7 +62,7 @@ public class PostSkiersEndpointTest {
         System.out.println("First thread from initial 32 took: " + (firstThreadEndTime - startTime) + "ms");
 
         for (int i = 0; i < LaterThreads; i++) {
-            laterExecutor.execute(new PostWorker(LaterRequestPerThread, eventQueue, successCount, resultQueue));
+            laterExecutor.execute(new PostWorkerWithoutSpecifiedRequestNumber(eventQueue, successCount, resultQueue, circuitBreaker));
         }
 
         requestGeneratorThread.join();
@@ -70,7 +75,6 @@ public class PostSkiersEndpointTest {
 
         long endTime = System.currentTimeMillis();
         System.out.println("Total threads: " + (INITIAL_THREADS + LaterThreads));
-        System.out.println("Each thread after the initial 32 is sending out: " + LaterRequestPerThread + " requests");
         System.out.println("Success count: " + successCount);
         System.out.println("Unsuccessful count: " + (TOTAL_REQUESTS - successCount.get()));
         System.out.println("Time taken: " + (endTime - startTime) + "ms");
