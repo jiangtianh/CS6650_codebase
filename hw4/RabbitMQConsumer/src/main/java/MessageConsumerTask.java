@@ -85,11 +85,9 @@ public class MessageConsumerTask implements Runnable {
                 System.err.println("Failed to get Redis connection");
                 return;
             }
-            System.out.println("Storing lift ride: " + messageJson);
+
             LiftRidePostRequest liftRide = gson.fromJson(messageJson, LiftRidePostRequest.class);
-
-            System.out.println("LiftRide: " + liftRide.toString());
-
+            
             String skierId = String.valueOf(liftRide.getSkierId());
             String resortId = String.valueOf(liftRide.getResortId());
             String seasonId = String.valueOf(liftRide.getSeasonId());
