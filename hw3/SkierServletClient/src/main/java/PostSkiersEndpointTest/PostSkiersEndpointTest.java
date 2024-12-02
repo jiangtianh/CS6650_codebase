@@ -17,7 +17,7 @@ public class PostSkiersEndpointTest {
     private static final String CSV_PATH = "result.csv";
 //    private static final String BASE_URL = "http://JavaServeletLoadBalancer-706956886.us-west-2.elb.amazonaws.com/JavaServlets_war/skiers";
 //    private static final String BASE_URL = "http://localhost:8080/JavaServlets_war_exploded/skiers";
-    private static final String BASE_URL = "http://44.242.215.217:8080/JavaServlets_war/skiers";
+    private static final String BASE_URL = "http://34.222.59.43:8080/JavaServlets_war/skiers";
 
     private static final int TOTAL_REQUESTS = 200000;
     private static final int INITIAL_THREADS = 32;
