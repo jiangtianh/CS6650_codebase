@@ -53,6 +53,7 @@ public class SkierServlet extends HttpServlet {
             try (Jedis jedis = RedisConnectionPool.getJedis()) {
                 if (jedis == null) {
                     sendErrorResponse(res, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to get Redis connection");
+                    return;
                 }
                 String skierSeasonKey = String.format("skier:%s:resort:%s:season:%s:day:%s", urlParts[7], urlParts[1], urlParts[3], urlParts[5]);
 
@@ -220,12 +221,11 @@ public class SkierServlet extends HttpServlet {
             }
             channel.basicPublish("", RabbitMQChannelPool.QUEUE_NAME, null, new Gson().toJson(
                     new LiftRidePostRequest(
-                            skierID,
                             resortID,
                             seasonID,
                             dayID,
-                            liftRide.getLiftID(),
-                            liftRide.getTime()
+                            skierID,
+                            liftRide
                     )).getBytes("UTF-8"));
         } catch (Exception e) {
             e.printStackTrace();

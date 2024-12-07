@@ -1,7 +1,6 @@
 import JSONClasses.ErrorMessage;
 import JSONClasses.ResortResponse;
 import com.google.gson.Gson;
-import org.json.HTTPTokener;
 import redis.clients.jedis.Jedis;
 
 import javax.servlet.ServletException;
@@ -39,6 +38,7 @@ public class ResortServlet extends HttpServlet {
                 try (Jedis jedis = RedisConnectionPool.getJedis()) {
                     if (jedis == null) {
                         sendErrorResponse(res, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to get Redis connection");
+                        return;
                     }
 
                     String setKey = "resort:" + resortId + ":season:" + seasonId + ":day:" + dayId;
@@ -58,6 +58,7 @@ public class ResortServlet extends HttpServlet {
                 } catch (Exception e) {
                     System.out.println("Error at GET /resorts/{resortID}/seasons/{seasonID}/day/{dayID}/skiers");
                     e.printStackTrace();
+                    sendErrorResponse(res, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error while fetching data");
                 }
             } catch (NumberFormatException e) {
             sendErrorResponse(res, HttpServletResponse.SC_BAD_REQUEST, "Invalid URL parameters");

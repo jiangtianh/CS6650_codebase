@@ -3,7 +3,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 public class RedisConnectionPool {
-    public static final String REDIS_HOST = "localhost";
+    public static final String REDIS_HOST = "54.218.229.163";
     private static final int REDIS_PORT = 6379;
     private static final int POOL_SIZE = 65;
 
@@ -11,13 +11,20 @@ public class RedisConnectionPool {
 
 
     static {
-        JedisPoolConfig poolConfig = new JedisPoolConfig();
-        poolConfig.setMaxTotal(POOL_SIZE);
-        poolConfig.setMinIdle(POOL_SIZE);
-        poolConfig.setMaxWaitMillis(2000);
+        try {
+            JedisPoolConfig poolConfig = new JedisPoolConfig();
+            poolConfig.setMaxTotal(POOL_SIZE);
+            poolConfig.setMinIdle(10);  // Adjust based on your needs
+            poolConfig.setMaxWaitMillis(2000);
 
-        jedisPool = new JedisPool(poolConfig, REDIS_HOST, REDIS_PORT);
+            jedisPool = new JedisPool(poolConfig, REDIS_HOST, REDIS_PORT, 2000);
+            System.out.println("Redis connection pool initialized successfully.");
+        } catch (Exception e) {
+            System.err.println("Failed to initialize Redis connection pool.");
+            e.printStackTrace();
+        }
     }
+
 
     public static Jedis getJedis() {
         try {

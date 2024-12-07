@@ -17,11 +17,11 @@ public class RabbitMQChannelPool {
 
     private RabbitMQChannelPool() throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
-//        factory.setHost("35.155.53.0");
-//        factory.setPort(5672);
-//        factory.setUsername("admin");
-//        factory.setPassword("admin");
+//        factory.setHost("localhost");
+        factory.setHost("35.155.53.0");
+        factory.setPort(5672);
+        factory.setUsername("admin");
+        factory.setPassword("admin");
 
         Connection connection = factory.newConnection();
         channelPool = new LinkedBlockingQueue<>(POOL_SIZE);

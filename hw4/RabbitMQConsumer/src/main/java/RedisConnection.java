@@ -3,7 +3,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 public class RedisConnection {
-    public static final String REDIS_HOST = "localhost";
+    public static final String REDIS_HOST = "54.218.229.163";
     private static final int REDIS_PORT = 6379;
 
     private static JedisPool jedisPool = null;
@@ -12,6 +12,7 @@ public class RedisConnection {
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMaxTotal(RabbitMQConsumer.NUM_THREADS);
         poolConfig.setMinIdle(RabbitMQConsumer.NUM_THREADS);
+//        poolConfig.setMaxIdle(RabbitMQConsumer.NUM_THREADS);
         jedisPool = new JedisPool(poolConfig, REDIS_HOST, REDIS_PORT);
     }
 

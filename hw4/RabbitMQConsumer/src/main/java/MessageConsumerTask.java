@@ -53,7 +53,6 @@ public class MessageConsumerTask implements Runnable {
                     }
                 }
             };
-
             scheduler.scheduleWithFixedDelay(ackTask, 30, 10, TimeUnit.SECONDS);
 
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
@@ -87,13 +86,12 @@ public class MessageConsumerTask implements Runnable {
             }
 
             LiftRidePostRequest liftRide = gson.fromJson(messageJson, LiftRidePostRequest.class);
-            
             String skierId = String.valueOf(liftRide.getSkierId());
             String resortId = String.valueOf(liftRide.getResortId());
             String seasonId = String.valueOf(liftRide.getSeasonId());
             String dayId = String.valueOf(liftRide.getDayId());
-            String liftId = String.valueOf(liftRide.getLiftId());
-            int vertical = liftRide.getLiftId() * 10;
+            String liftId = String.valueOf(liftRide.getLiftRide().getLiftID());
+            int vertical = liftRide.getLiftRide().getLiftID() * 10;
 
             String resortKey = "resort:" + resortId;
             String dayField = "season:" + seasonId + ":day:" + dayId;

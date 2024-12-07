@@ -9,7 +9,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RabbitMQConsumer {
-    public static final int NUM_THREADS = 64;
+    public static final int NUM_THREADS = 32;
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
 
     public static void main(String[] args) throws Exception {
@@ -18,10 +18,6 @@ public class RabbitMQConsumer {
         BlockingDeque<ResultRecord> resultQueue = new LinkedBlockingDeque<>();
         String RabbitMQIp = "35.155.53.0";
 
-        // Use this for ec2 instance
-//        String ResultCsvFilePath = "/home/ec2-user/result.csv";
-
-        // Use this for local testing
         String ResultCsvFilePath = "result.csv";
 
         System.out.println("Starting consumer... with" + NUM_THREADS + " threads");
@@ -31,11 +27,11 @@ public class RabbitMQConsumer {
         ConnectionFactory factory = new ConnectionFactory();
 
         // Set the RabbitMQ IP
-        factory.setHost("localhost");
-//        factory.setHost(RabbitMQIp);
-//        factory.setPort(5672);
-//        factory.setUsername("admin");
-//        factory.setPassword("admin");
+//        factory.setHost("localhost");
+        factory.setHost(RabbitMQIp);
+        factory.setPort(5672);
+        factory.setUsername("admin");
+        factory.setPassword("admin");
 
         Connection connection = factory.newConnection();
 
