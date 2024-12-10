@@ -19,10 +19,10 @@ public class EventGenerator implements Runnable{
     public void run() {
         for (int i = 0; i < totalRequests; i++) {
             int skierID = random.nextInt(100000) + 1;
-            int resortID = random.nextInt(10) + 1;
+            int resortID = 1;
             int liftID = random.nextInt(40) + 1;
             int seasonID = 2024;
-            int dayID = 1;
+            int dayID = (i / 200000) + 1;
             int time = random.nextInt(360) + 1;
 
 

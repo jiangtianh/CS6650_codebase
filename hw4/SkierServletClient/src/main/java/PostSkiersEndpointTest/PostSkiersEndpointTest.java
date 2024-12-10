@@ -15,11 +15,11 @@ public class PostSkiersEndpointTest {
 
 
     private static final String CSV_PATH = "result.csv";
-//    private static final String BASE_URL = "http://JavaServeletLoadBalancer-706956886.us-west-2.elb.amazonaws.com/JavaServlets_war/skiers";
+    private static final String BASE_URL = "http://LoadBalancer-481638051.us-west-2.elb.amazonaws.com/JavaServlets_war/skiers";
 //    private static final String BASE_URL = "http://localhost:8080/JavaServlets_war_exploded/skiers";
-    private static final String BASE_URL = "http://34.219.46.172:8080/JavaServlets_war/skiers";
+//    private static final String BASE_URL = "http://34.209.109.225:8080/JavaServlets_war/skiers";
 
-    private static final int TOTAL_REQUESTS = 200000;
+    private static final int TOTAL_REQUESTS = 600000;
     private static final int INITIAL_THREADS = 32;
     private static final int REQUESTS_PER_INITIAL_TREAD = 1000;
 
@@ -45,7 +45,7 @@ public class PostSkiersEndpointTest {
         long startTime = System.currentTimeMillis();
 
         HttpClient client = new HttpClient();
-        EventCountCircuitBreaker circuitBreaker = new EventCountCircuitBreaker(5000, 1, TimeUnit.SECONDS, 4500);
+        EventCountCircuitBreaker circuitBreaker = new EventCountCircuitBreaker(3800, 1, TimeUnit.SECONDS, 3300);
 
         for (int i = 0; i < INITIAL_THREADS; i++) {
             initialExecutor.submit(() -> {

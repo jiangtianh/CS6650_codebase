@@ -1,0 +1,11 @@
+ResultHandling/ResultHandler.class
+ResultHandling/PlotHandling/ThroughputPlotter.class
+ResultHandling/ResultProcessor.class
+JSONClasses/LiftRide.class
+CSVWriterTask.class
+JSONClasses/LiftRidePostRequest.class
+RedisConnection.class
+RabbitMQConsumer.class
+MessageConsumerTask.class
+ResultHandling/PlotHandling/ThroughputCalculator.class
+JSONClasses/ResultRecord.class

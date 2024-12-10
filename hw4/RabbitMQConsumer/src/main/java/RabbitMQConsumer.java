@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RabbitMQConsumer {
     public static final int NUM_THREADS = 32;
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
 
     public static void main(String[] args) throws Exception {
 
