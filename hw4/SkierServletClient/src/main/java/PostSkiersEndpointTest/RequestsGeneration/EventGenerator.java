@@ -18,7 +18,7 @@ public class EventGenerator implements Runnable{
     @Override
     public void run() {
         for (int i = 0; i < totalRequests; i++) {
-            int skierID = random.nextInt(100000) + 1;
+            int skierID = i % 100000 + 1;
             int resortID = 1;
             int liftID = random.nextInt(40) + 1;
             int seasonID = 2024;

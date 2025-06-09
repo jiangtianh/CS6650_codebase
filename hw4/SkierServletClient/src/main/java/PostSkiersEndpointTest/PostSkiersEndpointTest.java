@@ -45,7 +45,7 @@ public class PostSkiersEndpointTest {
         long startTime = System.currentTimeMillis();
 
         HttpClient client = new HttpClient();
-        EventCountCircuitBreaker circuitBreaker = new EventCountCircuitBreaker(3800, 1, TimeUnit.SECONDS, 3300);
+        EventCountCircuitBreaker circuitBreaker = new EventCountCircuitBreaker(4800, 1, TimeUnit.SECONDS, 4300);
 
         for (int i = 0; i < INITIAL_THREADS; i++) {
             initialExecutor.submit(() -> {
